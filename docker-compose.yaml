@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+  web:
+    image: IMAGE
+    container_name: CONTAINER
+    restart: always
+    build:
+      context: .
+      dockerfile: dockerfile
+    networks:
+      - network
+    ports:
+      - 8080:80
+networks:
+  network:
