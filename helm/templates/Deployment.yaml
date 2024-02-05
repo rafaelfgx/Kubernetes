@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}-deployment
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  replicas: {{ .Values.minReplicas }}
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      nodeSelector:
+        app: {{ .Values.name }}
+      containers:
+        - name: {{ .Values.name }}
+          image: {{ .Values.image }}
+          envFrom:
+            - configMapRef:
+              name: {{ .Values.name }}-config
+          ports:
+            - containerPort: {{ .Values.port }}
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            readinessProbe:
+              tcpSocket:
+                port: {{ .Values.port }}
+              initialDelaySeconds: 10
+              periodSeconds: 60
+            livenessProbe:
+              tcpSocket:
+                port: {{ .Values.port }}
+              initialDelaySeconds: 10
+              periodSeconds: 60
